@@ -77,31 +77,31 @@ const MyHospitals: React.FC = () => {
     ? filteredProviders.slice(firstPostIndex, lastPostIndex)
     : providers.slice(firstPostIndex, lastPostIndex);
 
-    // const handleShare = () => {
-    //   if (typeof window !== "undefined" && navigator.share) {
-    //     const shareData = {
-    //       title: "Selected Providers",
-    //       text: "Check out these selected providers!",
-    //       url: window.location.href,
-    //     };
+    const handleShare = () => {
+      if (typeof window !== "undefined" && navigator.share) {
+        const shareData = {
+          title: "Selected Providers",
+          text: "Check out these selected providers!",
+          url: window.location.href,
+        };
     
-    //     navigator
-    //       .share(shareData)
-    //       .then(() => {
-    //         console.log("Successfully shared.");
-    //       })
-    //       .catch((error) => {
-    //         console.error("Error sharing:", error);
-    //       });
-    //   } else {
-    //     console.log("Web Share API not supported in this browser.");
-    //   }
-    // };
+        navigator
+          .share(shareData)
+          .then(() => {
+            console.log("Successfully shared.");
+          })
+          .catch((error) => {
+            console.error("Error sharing:", error);
+          });
+      } else {
+        console.log("Web Share API not supported in this browser.");
+      }
+    };
     
 
   return (
     <section className="bg-Primary py-20 min-h-screen translate-y-20 w-auto ">
-      {/* Floating container */}
+ 
       <div className="container overscroll-auto box-border h-auto w-3/4  -mt-40 pb-4 bg-white m-auto shadow-xl rounded-lg shadow-lg md:w-full">
         <h2 className="text-Grey/800 text-2xl font-bold md: text-4 lg:text-3xl text-center  mb-6 p-8">
           Hospitals in Nigeria
@@ -164,7 +164,7 @@ const MyHospitals: React.FC = () => {
               Showing {filteredProviders.length} Locations
             </p>
             <div className="flex gap-4">
-              <button className="btn btn-secondary cursor-text">
+              <button className="btn btn-secondary" onClick={handleShare}>
                 Share
               </button>
               <button className="btn btn-secondary hover:bg-Primary">
