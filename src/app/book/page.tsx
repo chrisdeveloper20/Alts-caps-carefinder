@@ -1,11 +1,9 @@
 'use client'
 import { signOut } from 'firebase/auth';
-import {useAuthState} from 'react-firebase-hooks/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../firebase/config';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-
-
 
 const Booking = () => {
   const [formData, setFormData] = useState({
@@ -28,24 +26,27 @@ const Booking = () => {
   };
 
   const [user] = useAuthState(auth);
-  const userSession = sessionStorage.getItem('user');
+  const [userSession, setUserSession] = useState<string | null>(null);
   const router = useRouter();
   
+  useEffect(() => {
+    const session = sessionStorage.getItem('user');
+    setUserSession(session);
+  }, []);
+
   if (!user && !userSession) {
     router.push('/');
-
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg:dark">
-        <button className='bg-red-400 p-2 text-white font-bold mx-24 '
-         onClick={() => {
-            signOut(auth)
-            sessionStorage.removeItem('user')
-         }}>
-            
-            Logout
-        </button>
+      <button className='bg-red-400 p-2 text-white font-bold mx-24 '
+       onClick={() => {
+          signOut(auth)
+          sessionStorage.removeItem('user')
+       }}>
+          Logout
+      </button>
 
       <div className="bg-gray-700 p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-200">Book a Medical Appointment</h2>

@@ -17,7 +17,7 @@ const MyHospitals: React.FC = () => {
   const [providers, setProviders] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [postsPerPage] = useState<number>(12);
-
+  
   const [searchInput, setSearchInput] = useState<string>("");
   const [filteredProviders, setFilteredProviders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -77,26 +77,27 @@ const MyHospitals: React.FC = () => {
     ? filteredProviders.slice(firstPostIndex, lastPostIndex)
     : providers.slice(firstPostIndex, lastPostIndex);
 
-  const handleShare = () => {
-    if (navigator.share) {
-      const shareData = {
-        title: "Selected Providers",
-        text: "Check out these selected providers!",
-        url: window.location.href,
-      };
-
-      navigator
-        .share(shareData)
-        .then(() => {
-          console.log("Successfully shared.");
-        })
-        .catch((error) => {
-          console.error("Error sharing:", error);
-        });
-    } else {
-      console.log("Web Share API not supported in this browser.");
-    }
-  };
+    // const handleShare = () => {
+    //   if (typeof window !== "undefined" && navigator.share) {
+    //     const shareData = {
+    //       title: "Selected Providers",
+    //       text: "Check out these selected providers!",
+    //       url: window.location.href,
+    //     };
+    
+    //     navigator
+    //       .share(shareData)
+    //       .then(() => {
+    //         console.log("Successfully shared.");
+    //       })
+    //       .catch((error) => {
+    //         console.error("Error sharing:", error);
+    //       });
+    //   } else {
+    //     console.log("Web Share API not supported in this browser.");
+    //   }
+    // };
+    
 
   return (
     <section className="bg-Primary py-20 min-h-screen translate-y-20 w-auto ">
@@ -163,7 +164,7 @@ const MyHospitals: React.FC = () => {
               Showing {filteredProviders.length} Locations
             </p>
             <div className="flex gap-4">
-              <button className="btn btn-secondary" onClick={handleShare}>
+              <button className="btn btn-secondary cursor-text">
                 Share
               </button>
               <button className="btn btn-secondary hover:bg-Primary">
