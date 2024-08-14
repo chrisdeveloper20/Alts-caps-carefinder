@@ -6,3 +6,196 @@
 @tailwind utilities;
 
 
+.form-container {
+    /* border: 1px solid red; */
+  
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 400px;
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+  
+  .main-header{
+    border-bottom: 1px solid grey;
+    padding: 15px;
+    margin: 0;
+  }
+  
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .form h1 {
+    /* display: flex;
+    justify-content: center; */
+    /* margin: 1.8rem 0 0.5rem 0; */
+    font-size: 1rem;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bolder;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 365px;
+    margin: 0 auto;
+    gap: 1rem;
+  
+    /* border: 1px solid grey; */
+  }
+  
+  
+  
+  .back-arrow {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .form input:active {
+    border: 1px solid rgb(197, 197, 221);
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+  .input-group_input {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    border: 1px solid grey;
+    outline: none;
+  }
+  
+  .input-group_input,
+  .error {
+    left: 0;
+    position: relative;
+  }
+  
+  .input-group_input ~ .input-group_label {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: #fff;
+    padding: 0 3px;
+    border: 1px solid transparent;
+    transition: top 300ms, color 300ms, border-color 300ms, font-size 300ms;
+  }
+  
+  .input-group_input:focus ~ .input-group_label,
+  .input-group_input:not(:placeholder-shown) ~ .input-group_label {
+    top: -8px;
+    border: black;
+    transition: 0.15ms;
+    color: #3B82F6;
+  }
+  
+  @keyframes error-shake {
+    0% {
+      left: -10px;
+    }
+    20% {
+      left: 8px;
+    }
+    40% {
+      left: -6px;
+    }
+    60% {
+      left: 4px;
+    }
+    80% {
+      left: -2px;
+    }
+    100% {
+      left: 0;
+    }
+  }
+  
+  .error {
+    display: block;
+    /* visibility: hidden; */
+    display: none;
+    margin: 4px 0 4px 10px;
+    font-size: 1rem;
+    color: red;
+  }
+  
+  .input-group_input:not(:focus):invalid {
+    border: 2px solid red;
+    color: red;
+  }
+  
+  .input-group_input:not(:focus):invalid ~ .error {
+    /* visibility: visible; */
+    display: block;
+    animation: error-shake 600ms;
+  }
+  
+  .input-group_input:not(:focus):invalid ~ .input-group_label {
+    color: red;
+    border: 1px solid red;
+    margin-top: -3px;
+  }
+  
+  .form button {
+    background-color: #3B82F6;
+    color: #fff;
+    padding: 0.7rem;
+    border-radius: 10px;
+  }
+  
+  form button:hover {
+    background-color: #fff;
+    border: 1px solid #000;
+    color: black;
+  }
+  
+  .link a {
+    color: #3B82F6;
+    /* text-decoration: underline; */
+  }
+  
+  .google-sign {
+    display: flex;
+    margin: 0 auto;
+    gap: 5px;
+    margin-top: 15px;
+    border: 1px solid grey;
+    width: 370px;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  
+  .google-sign .google-image {
+    margin-left: 130px;
+  }
+  
+  
+  .small-font {
+    font-size: 0.8rem; /* Adjust the size as needed */
+    color: #10B981; /* Optional: Add color to match your design */
+  }
+  
+  @media only screen and (max-width: 600px) { 
+    .form-container {
+      width: 100%;
+      margin-top: 0;
+      padding: 12px;
+    }
+  
+    .form {
+      width: 100%;
+    }
+  
+    .google-sign {
+      width: 100%;
+    }
+  }

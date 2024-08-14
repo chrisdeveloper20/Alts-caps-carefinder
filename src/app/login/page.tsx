@@ -1,170 +1,248 @@
+
+
 "use client";
-
-import {  signIn } from "next-auth/react";
-import Image from "next/image";
-import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
-import { auth } from "@/app/firebase/config";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-// import { useAuthState } from "react-firebase-hooks/auth";
-// import { signInWithPopup } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth, firestore } from "../firebase/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import Image from "next/image";
+import { IoIosArrowRoundBack } from "react-icons/io";
+import Link from "next/link";
+import { AiTwotoneEye, AiTwotoneEyeInvisible } from "react-icons/ai";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const Login = () => {
+const notify = () => {
+  toast.success ("  Will take few seconds to Login in. ", {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined
+  });
+};
+
+const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [createUserWithEmailAndPassword] =
-    useCreateUserWithEmailAndPassword(auth);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const router = useRouter();
+  let errorTimeout: NodeJS.Timeout;
 
-  const handleSingIn = async () => {
+  useEffect(() => {
+    if (error) {
+      errorTimeout = setTimeout(() => {
+        setError(null);
+      }, 4000); // Clear error message after 5 seconds
+    }
+
+    // Clean up the timeout if the component unmounts
+    return () => clearTimeout(errorTimeout);
+  }, [error]);
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+
     try {
-      const res = await createUserWithEmailAndPassword(email, password);
-      console.log({ res });
-      sessionStorage.setItem("user", String(true));
-      setEmail("");
-      setPassword("");
-      router.push("/book");
-    } catch (e) {
-      console.error(e);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      if (user.emailVerified) {
+        // Retrieve user data from local storage
+        const registrationData = localStorage.getItem("registrationData");
+        const { profileName = "" } = registrationData
+          ? JSON.parse(registrationData)
+          : {};
+
+        // Check if user data exist in firestore
+        const userDoc = await getDoc(doc(firestore, "users", user.uid));
+        if (!userDoc.exists()) {
+          // Save user data to firestore after email verification
+          await setDoc(doc(firestore, "users", user.uid), {
+            profileName,
+            email: user.email,
+          });
+        }
+        router.push("/dashboard");
+      } else {
+        setError("Please verify your email address");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  // const handleGoogleSingIn = async () => {
-  //         try {
-  //           const provider = new GoogleAuthProvider();
-  //           await signInWithPopup(auth, provider);
-  //           sessionStorage.setItem("user", true);
-  //           router.push('/book');
-  //         }catch (e){
-  //           console.error(e);
-  //         }
-  // }
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setLoading(true);
 
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
+      // Check if user data exist in firestore
+      const userDoc = await getDoc(doc(firestore, "users", user.uid));
+      if (!userDoc.exists()) {
+        // Save user data to firestore if it doesn't exist
+        await setDoc(doc(firestore, "users", user.uid), {
+          profileName: user.displayName || "User",
+          email: user.email,
+        });
+      }
+
+      // Store user data in local storage
+      localStorage.setItem(
+        "userData",
+        JSON.stringify({
+          uid: user.uid,
+          profileName: user.displayName || "User",
+          email: user.email,
+        })
+      );
+
+      router.push("/dashboard");
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("An unknown error occurred during Google sign-in");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleVisibility = () => setIsVisible(!isVisible);
 
   return (
-    <>
-      <div>
-        <section className="bg-blueGray-50 my-8">
-          <div className="w-full lg:w-4/12 px-4 mx-auto pt-6">
-            <div className="relative flex flex-col min-w-0 break-words w-full mb-6 
-            shadow-lg rounded-lg bg-blueGray-200 border-0">
-              <div className="rounded-t mb-0 px-6 py-6">
-                <div className="text-center mb-3">
-                  <h6 className="text-blueGray-500 text-sm font-bold">
-                    Sign in with
-                  </h6>
-                </div>
-                <div className="btn-wrapper text-center">
-                  <button
-                    className="bg-white active:bg-blueGray-50 text-blueGray-700 
-                    font-bold px-4 py-2 rounded outline-none focus:outline-none mr-2 
-                    mb-1 uppercase shadow hover:shadow-md inline-flex items-center text-xs 
-                    ease-linear transition-all duration-150 cursor-text"
-                    type="button"
-                    disabled
-                  >
-                    <Image
-                      alt="..."
-                      className="w-5 mr-1"
-                      src="https://demos.creative-tim.com/notus-js/assets/img/github.svg"
-                      width={40}
-                      height={60}
-                    />
-                    Github
-                  </button>
-                  <button
-                    className="bg-white active:bg-blueGray-50 text-blueGray-700 
-                    font-bold px-4 py-2 rounded outline-none focus:outline-none 
-                    mr-1 mb-1 uppercase shadow hover:shadow-md inline-flex items-center 
-                    text-xs ease-linear transition-all duration-150 cursor-text"
-                    type="button"
-                    disabled
-                  >
-                    <Image
-                      alt="..."
-                      className="w-5 mr-1"
-                      src="https://demos.creative-tim.com/notus-js/assets/img/google.svg"
-                      width={40}
-                      height={60}
-                    />
-                    Google{" "}
-                  </button>
-                </div>
-                <hr className="mt-6 border-b-1 border-blueGray-300" />
-              </div>
-              <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
-                <div className="text-blueGray-400 text-center mb-3 font-bold">
-                  <small>Or sign in with credentials</small>
-                </div>
-                <form>
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300  
-                      bg-white rounded text-sm shadow focus:outline-none focus:ring 
-                      w-full ease-linear transition-all duration-150"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <div className="relative w-full mb-3">
-                    <label
-                      className="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                      htmlFor="grid-password"
-                    >
-                      Password
-                    </label>
-                    <input
-                      type="password"
-                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 
-                      bg-white rounded text-sm shadow focus:outline-none focus:ring w-full 
-                      ease-linear transition-all duration-150"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        id="customCheckLogin"
-                        type="checkbox"
-                        className="form-checkbox border-0 rounded text-blueGray-700 
-                        ml-1 w-5 h-5 ease-linear transition-all duration-150"
-                      />
-                      <span className="ml-2 text-sm font-semibold text-blueGray-600">
-                        Remember me
-                      </span>
-                    </label>
-                  </div>
-                  <div className="text-center mt-6">
-                    <button
-                      className="bg-blue-800 text-white active:bg-blueGray-600
-                       text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg 
-                       outline-none focus:outline-none mr-1 mb-1 w-full ease-linear 
-                       transition-all duration-150"
-                      type="button"
-                      onClick={handleSingIn}
-                    >
-                      Sign In
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </>
+    <div className="form-container">
+      <form onSubmit={handleLogin} className="form">
+        <div className="form-header">
+          <p className="link">
+            <a href="#" onClick={() => router.push("/")}>
+              <IoIosArrowRoundBack className="back-arrow" />
+            </a>
+          </p>
+          <h1> Scissors Login</h1>
+          <p className="link">
+            <a href="#" onClick={() => router.push("/register")}>
+              Sign Up
+            </a>
+          </p>
+        </div>
+
+        <div className="input-group">
+          <input
+            type="email"
+            id="Email"
+            name="Email"
+            placeholder=""
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="input-group_input"
+          />
+
+          <label htmlFor="email" className="input-group_label">
+            Email Address
+          </label>
+        </div>
+
+        <div className="input-group">
+          <input
+            type={isVisible ? "text" : "password"}
+            id="password"
+            name="password"
+            placeholder=""
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="input-group_input"
+          />
+
+          <span
+            onClick={toggleVisibility}
+            aria-label="toggle password visibility"
+          >
+            {isVisible ? (
+              <AiTwotoneEyeInvisible className="text-2xl text-default-400 text-deep-purple absolute right-2 bottom-2" />
+            ) : (
+              <AiTwotoneEye className="text-2xl text-default-400 text-deep-purple absolute right-2 bottom-2" />
+            )}
+          </span>
+
+          <label htmlFor="password" className="input-group_label">
+            Password
+          </label>
+        </div>
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <button
+         onClick={notify}
+          type="submit"
+          disabled={loading}
+          className={` ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          {loading ? "Signing In..." : "Sign In"}
+        </button>
+
+        <ToastContainer 
+          position="top-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          />
+
+        <div className="or">
+          <div className="dash"></div>
+          <div className="continue-with">or go with</div>
+          <div className="dash"></div>
+        </div>
+      </form>
+
+      <button
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        className="google-sign"
+      >
+        <Image
+          className="google-image"
+          src="https://www.svgrepo.com/show/475656/google-color.svg"
+          width={20}
+          height={5}
+          loading="lazy"
+          alt="google logo"
+        />
+        <span> Google</span>
+      </button>
+    </div>
   );
 };
 
-export default Login;
+export default Signin;
