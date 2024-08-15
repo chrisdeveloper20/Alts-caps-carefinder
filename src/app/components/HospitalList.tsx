@@ -20,7 +20,6 @@ const HospitalList: React.FC<HospitalListProps> = ({ providers }) => {
           key={index}
           name={provider.name}
           address={provider.address}
-        //   phone={provider.phone}
         />
       ))}
     </div>
